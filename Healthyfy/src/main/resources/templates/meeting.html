@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Meeting</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to bottom, #333, #555); /* Gradient background */
+            color: white;
+            text-align: center;
+        }
+
+        header {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 15px 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            padding: 10px 20px;
+            transition: background-color 0.3s, transform 0.3s;
+            border-radius: 5px; /* Rounded corners for links */
+        }
+
+        header a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 80px;
+            flex-wrap: wrap; /* Allow items to wrap */
+            gap: 20px; /* Space between items */
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+            color: black;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px; /* Limit width of the container */
+            flex: 1 1 300px; /* Responsive */
+        }
+
+        .container h1 {
+            margin-bottom: 20px;
+        }
+
+        .container button {
+            padding: 12px 24px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.3s; /* Smooth transition */
+        }
+
+        .container button.join {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .container button.create {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .container button:hover {
+            transform: scale(1.05); /* Slightly enlarge on hover */
+        }
+
+        .image-container img {
+            max-width: 400px;
+            max-height: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Shadow for the image */
+        }
+
+        #meeting-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8); /* Darker overlay */
+            justify-content: center;
+            align-items: center;
+        }
+
+        #meeting-modal .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Shadow for modal */
+        }
+
+        #meeting-modal input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #meeting-modal button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.3s; /* Smooth transition */
+        }
+
+        #meeting-modal button.join {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #meeting-modal button.join:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="http://localhost:8080/home">Home</a>
+        <a href="http://localhost:8080/appointment">Book Appointment</a>
+        <a href="http://localhost:8080/meeting">TALK LIVE WITH DOCTOR</a>
+        <a href="http://localhost:8080/testchat">Chat with Us</a>
+    </header>
+
+    <div class="main-content">
+        <div class="container">
+            <h1>TALK WITH DOCTOR LIVE</h1>
+            <button class="create" onclick="createMeeting()">Create Meeting</button>
+            <button class="join" onclick="showJoinModal()">Join Meeting</button>
+        </div>
+        <div class="image-container">
+            <img src="Images/doctor.png" alt="Doctor Consultation">
+        </div>
+    </div>
+
+    <div id="meeting-modal">
+        <div class="modal-content">
+            <h2>Join Meeting</h2>
+            <input type="text" id="meeting-id" placeholder="Enter Meeting ID">
+            <button class="join" onclick="joinMeeting()">Join</button>
+        </div>
+    </div>
+
+    <!-- Include the Jitsi Meet API -->
+    <script src="https://meet.jit.si/external_api.js"></script>
+
+    <script>
+        function createMeeting() {
+            const meetingId = generateMeetingID();
+            startMeeting(meetingId);
+        }
+
+        function showJoinModal() {
+            document.getElementById('meeting-modal').style.display = 'flex';
+        }
+
+        function joinMeeting() {
+            const meetingId = document.getElementById('meeting-id').value.trim();
+            if (meetingId) {
+                startMeeting(meetingId);
+                document.getElementById('meeting-modal').style.display = 'none';
+            } else {
+                alert('Please enter a valid meeting ID.');
+            }
+        }
+
+        function startMeeting(meetingId) {
+            const domain = "meet.jit.si";
+            const options = {
+                roomName: meetingId,
+                width: "100%",
+                height: 600,
+                parentNode: document.body
+            };
+            const api = new JitsiMeetExternalAPI(domain, options);
+        }
+
+        function generateMeetingID() {
+            return 'meet-' + Math.random().toString(36).substr(2, 9);
+        }
+    </script>
+</body>
+
+</html>
+
+

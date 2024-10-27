@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Your Appointment</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+            margin: 0;
+            background-color: #000; /* Set the background color to black */
+            color: #fff; /* Change text color to white for better contrast */
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            width: 100%;
+            background-color: #444; /* Dark background for header */
+            padding: 10px 0;
+            display: flex;
+            justify-content: space-around; /* Space out the menu items */
+            align-items: center;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            padding: 10px;
+            transition: background-color 0.3s;
+        }
+
+        header a:hover {
+            background-color: #555; /* Darker on hover */
+        }
+
+        h1 {
+            margin-top: 20px; /* Margin for header */
+        }
+
+        table {
+            width: 80%;
+            max-width: 800px;
+            border-collapse: collapse; /* Combine borders */
+            margin-top: 20px; /* Space between header and table */
+            background-color: #222; /* Dark background for table */
+            color: #fff; /* Text color */
+        }
+
+        th, td {
+            padding: 15px;
+            border: 1px solid #ccc; /* Border for table cells */
+            text-align: left; /* Align text to the left */
+        }
+
+        th {
+            background-color: #444; /* Dark background for table headers */
+        }
+
+        .book-button {
+            padding: 10px 15px;
+            background-color: #007bff; /* Blue background for buttons */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+         .main-container {
+            display: flex;
+            align-items: flex-start;
+            margin-top: 20px;
+            width: 90%;
+            max-width: 1200px;
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .book-button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+
+        .chat-button {
+            padding: 10px 15px;
+            background-color: #28a745; /* Green background for chat buttons */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .chat-button:hover {
+            background-color: #218838; /* Darker green on hover */
+        }
+
+        /* Popup styles */
+        .popup {
+            display: none; /* Initially hidden */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center the popup */
+            background-color: #444;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000; /* Ensure it appears on top */
+        }
+
+        .popup.active {
+            display: block; /* Show when active */
+        }
+
+        .popup button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #dc3545; /* Red background for close button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+           <a href="http://localhost:8080/home">Home</a>
+        <a href="http://localhost:8080/appointment">Book Appointment</a>
+        <a href="http://localhost:8080/meeting">TALK LIVE WITH DOCTOR</a>
+        <a href="http://localhost:8080/testchat">Chat with Us</a>
+    </header>
+      <h1>Book Your Appointment with the Nearby Doctor</h1>
+     <div class="main-container">
+ <div class="image-container">
+            <img src="Images/doctor.png" alt="Doctor Image">
+        </div>
+  
+
+    <table>
+        <thead>
+            <tr>
+                <th>Doctor Name</th>
+                <th>Specialist</th>
+                <th>Location</th>
+                <th>Book Now</th>
+                <th>Chat with Doctor</th> <!-- New Column for Chat -->
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Doctor 1</td>
+                <td>Specialist 1</td>
+                <td>Location 1</td>
+                <td><button class="book-button" onclick="bookAppointment()">BOOK</button></td>
+                <td><button class="chat-button" onclick="openChat()">Chat Now</button></td> <!-- Chat Now Button -->
+            </tr>
+            <tr>
+                <td>Doctor 2</td>
+                <td>Specialist 2</td>
+                <td>Location 2</td>
+                <td><button class="book-button" onclick="bookAppointment()">BOOK</button></td>
+                <td><button class="chat-button" onclick="openChat()">Chat Now</button></td> <!-- Chat Now Button -->
+            </tr>
+            <tr>
+                <td>Doctor 3</td>
+                <td>Specialist 3</td>
+                <td>Location 3</td>
+                <td><button class="book-button" onclick="bookAppointment()">BOOK</button></td>
+                <td><button class="chat-button" onclick="openChat()">Chat Now</button></td> <!-- Chat Now Button -->
+            </tr>
+            <tr>
+                <td>Doctor 4</td>
+                <td>Specialist 4</td>
+                <td>Location 4</td>
+                <td><button class="book-button" onclick="bookAppointment()">BOOK</button></td>
+                <td><button class="chat-button" onclick="openChat()">Chat Now</button></td> <!-- Chat Now Button -->
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="popup" id="popup">
+        <p>Your appointment has been booked!</p>
+        <button onclick="closePopup()">Close</button>
+    </div>
+</div>>
+    <script>
+        function bookAppointment() {
+            const popup = document.getElementById('popup');
+            popup.classList.add('active'); // Show popup
+        }
+
+        function closePopup() {
+            const popup = document.getElementById('popup');
+            popup.classList.remove('active'); // Hide popup
+        }
+
+        function openChat() {
+            window.location.href = 'http://localhost:8080/chatroom'; // Redirect to chat room
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #2c2c2c;
+            color: white;
+        }
+
+        header {
+            width: 100%;
+            background-color: #444;
+            padding: 10px 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            padding: 10px;
+            transition: background-color 0.3s;
+        }
+
+        header a:hover {
+            background-color: #555;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: calc(100vh - 50px);
+            padding: 20px;
+        }
+
+        .image-container {
+            margin-right: 20px;
+        }
+
+        .chat-container {
+            width: 400px;
+            background: #3c3c3c;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .chat-container header {
+            padding: 10px;
+            background-color: #444;
+            text-align: center;
+        }
+
+        .messages {
+            height: 300px;
+            padding: 10px;
+            overflow-y: scroll;
+            background: #444;
+        }
+
+        .messages p {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 5px;
+            max-width: 75%;
+            word-wrap: break-word;
+        }
+
+        .sent {
+            background-color: #1e90ff;
+            align-self: flex-end;
+        }
+
+        .received {
+            background-color: #28a745;
+            align-self: flex-start;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #555;
+            color: white;
+        }
+
+        .input-area button {
+            padding: 10px 15px;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 4px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+
+        .input-area button:hover {
+            background: #0056b3;
+        }
+
+        img {
+            max-width: 500px;
+            height: auto;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="http://localhost:8080/home">Home</a>
+        <a href="http://localhost:8080/appointment">Appointment</a>
+        <a href="http://localhost:8080/chatroom">Talk live with doctor</a>
+        <a href="http://localhost:8080/testchat">Chat with Us</a>
+    </header>
+    <div class="main-container">
+        <div class="image-container">
+            <img src="Images/DOCTOR2.png" alt="Doctor Image">
+        </div>
+        <div class="chat-container">
+            <header>
+               
+                <h1>Chat with doctor</h1>
+            </header>
+            <div id="messages" class="messages"></div>
+            <div class="input-area">
+                <input type="text" id="messageInput" placeholder="Type your message here..." />
+                <button id="sendMessageButton">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = new SockJS('/chat');
+        const stompClient = Stomp.over(socket);
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendMessageButton = document.getElementById('sendMessageButton');
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            
+            stompClient.subscribe('/topic/messages', function (message) {
+                const msg = JSON.parse(message.body);
+                showMessage(msg.content, 'received');
+            });
+        });
+
+        function showMessage(message, type) {
+            const messageElement = document.createElement('p');
+            messageElement.textContent = message;
+
+            if (type === 'sent') {
+                messageElement.classList.add('sent');
+            } else {
+                messageElement.classList.add('received');
+            }
+
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        sendMessageButton.onclick = function () {
+            const message = messageInput.value.trim();
+            if (message) {
+                stompClient.send("/app/sendMessage", {}, JSON.stringify({ content: message }));
+                showMessage(message, 'sent');
+                messageInput.value = '';
+            }
+        };
+
+        messageInput.addEventListener('keypress', function (event) {
+            if (event.key === 'Enter') {
+                sendMessageButton.click();
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+

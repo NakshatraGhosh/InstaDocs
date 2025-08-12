@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Appointment Chat Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+        .chat-container {
+            width: 400px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .chat-header {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .chat-messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 10px;
+            background: #fafafa;
+            margin-bottom: 10px;
+        }
+        .chat-message {
+            margin-bottom: 8px;
+        }
+        .chat-message .sender {
+            font-weight: bold;
+            color: #2a7ae2;
+        }
+        .chat-input-area {
+            display: flex;
+            gap: 8px;
+        }
+        .chat-input-area input[type="text"] {
+            flex: 1;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .chat-input-area button {
+            padding: 8px 16px;
+            border: none;
+            background: #2a7ae2;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .chat-input-area button:hover {
+            background: #155a9c;
+        }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <div class="chat-header">Chat Room</div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-area">
+        <input type="text" id="sender" placeholder="Your name" autocomplete="username" required>
+        <input type="text" id="message" placeholder="Type your message..." autocomplete="off" required>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+<script>
+    // Replace this with the actual roomId from your appointment model
+    // You can set this dynamically using Thymeleaf or JS templating
+    const roomId = /*[[${appointment.roomId}]]*/ 'REPLACE_WITH_ROOM_ID';
+
+    let stompClient = null;
+
+    function connect() {
+        const socket = new SockJS('/ws-chat');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            stompClient.subscribe('/topic/chat/' + roomId, function (message) {
+                showMessage(JSON.parse(message.body));
+            });
+        });
+    }
+
+    function sendMessage() {
+        const sender = document.getElementById('sender').value.trim();
+        const content = document.getElementById('message').value.trim();
+        if (!sender || !content) return;
+        const chatMessage = {
+            roomId: roomId,
+            sender: sender,
+            content: content
+        };
+        stompClient.send("/app/chat.sendMessage/" + roomId, {}, JSON.stringify(chatMessage));
+        document.getElementById('message').value = '';
+    }
+
+    function showMessage(message) {
+        const chatMessages = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = 'chat-message';
+        div.innerHTML = `<span class="sender">${message.sender}:</span> ${message.content}`;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Auto-connect on page load
+    window.onload = connect;
+</script>
+</body>
+</html>

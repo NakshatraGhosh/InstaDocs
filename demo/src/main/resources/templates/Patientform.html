@@ -1,0 +1,76 @@
+<!-- Patient Info Form -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Patient</title>
+    <style>
+        #map {
+            height: 300px;
+            width: 100%;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h2>Add Patient Information</h2>
+    <form method="post" action="/patients/add">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required /><br/>
+
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" required /><br/>
+
+        <label for="gender">Gender:</label>
+        <input type="text" id="gender" name="gender" required /><br/>
+
+        <label>Select Location on Map:</label>
+        <div id="map"></div>
+
+        <input type="hidden" id="latitude" name="latitude" required />
+        <input type="hidden" id="longitude" name="longitude" required />
+
+        <p>
+            <span>Latitude: <span id="latDisplay">Not selected</span></span><br/>
+            <span>Longitude: <span id="lngDisplay">Not selected</span></span>
+        </p>
+
+        <button type="submit">Add Patient</button>
+    </form>
+
+    <script>
+        let map, marker;
+
+        function initMap() {
+            const defaultCenter = { lat: 22.5726, lng: 88.3639 }; // Kolkata
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 12,
+                center: defaultCenter
+            });
+
+            map.addListener("click", (e) => {
+                placeMarker(e.latLng);
+            });
+        }
+
+        function placeMarker(location) {
+            if (marker) {
+                marker.setPosition(location);
+            } else {
+                marker = new google.maps.Marker({
+                    position: location,
+                    map: map
+                });
+            }
+            document.getElementById("latitude").value = location.lat();
+            document.getElementById("longitude").value = location.lng();
+            document.getElementById("latDisplay").textContent = location.lat().toFixed(6);
+            document.getElementById("lngDisplay").textContent = location.lng().toFixed(6);
+        }
+    </script>
+    <script async
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBKz7VKr0oNn4Fhzt4Wo-brkTO-_4Ozi-g&callback=initMap">
+    </script>
+</body>
+</html>

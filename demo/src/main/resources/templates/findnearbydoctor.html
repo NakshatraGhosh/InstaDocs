@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Find Nearby Doctors</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(to right, #74ebd5, #9face6);
+            font-family: 'Segoe UI', sans-serif;
+            padding: 20px;
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 2px solid #fff;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .btn-find {
+            display: block;
+            margin: 0 auto 40px auto;
+        }
+
+        table {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: #2d89ef;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f6ff;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Find Nearby Doctors</h1>
+
+<div id="map"></div>
+
+<!-- Button -->
+<button class="btn btn-primary btn-lg btn-find" onclick="findNearbyDoctors()">Find Doctors Near Me</button>
+
+<!-- Table for doctor results -->
+<div class="container" th:if="${doctors != null}">
+    <h2 class="text-white text-center mb-4">Nearby Doctors</h2>
+    <table class="table table-bordered text-center">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Specialization</th>
+                <th>Location</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="doc : ${doctors}">
+                <td th:text="${doc.name}">Dr. Name</td>
+                <td th:text="${doc.specialization}">Specialty</td>
+                <td th:text="${doc.location}">Location</td>
+                <td>
+                    <button class="btn btn-success" th:onclick="'bookAppointmentWith(\\'' + ${doc.name} + '\\')'">Book Appointment</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Appointment Modal -->
+<div class="modal fade" id="appointmentModal" tabindex="-1" aria-labelledby="appointmentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="appointmentModalLabel">Appointment Booked</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        Appointment booked successfully.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Google Maps & JS -->
+<script>
+    let userLat = null;
+    let userLng = null;
+    let map;
+
+    function initMap() {
+        const defaultCenter = { lat: 22.5726, lng: 88.3639 }; // Kolkata
+        map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 12,
+            center: defaultCenter
+        });
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                userLat = position.coords.latitude;
+                userLng = position.coords.longitude;
+                const userLocation = { lat: userLat, lng: userLng };
+                map.setCenter(userLocation);
+                new google.maps.Marker({
+                    position: userLocation,
+                    map: map,
+                    title: "You are here"
+                });
+            },
+            () => {
+                alert("Failed to get your location. Please allow location access.");
+            }
+        );
+    }
+
+    function findNearbyDoctors() {
+        if (userLat && userLng) {
+            const locPath = `${userLat},${userLng}`;
+            window.location.href = `/home/finddoctors/${locPath}`;
+        } else {
+            alert("Fetching your location... Please try again in a moment.");
+        }
+    }
+
+    function bookAppointmentWith(doctorName) {
+        const modalBody = document.getElementById("modalBody");
+        modalBody.innerHTML = `Appointment with <strong>${doctorName}</strong> booked successfully!`;
+        const modal = new bootstrap.Modal(document.getElementById("appointmentModal"));
+        modal.show();
+    }
+</script>
+
+<script async
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBKz7VKr0oNn4Fhzt4Wo-brkTO-_4Ozi-g&callback=initMap">
+</script>
+
+<!-- Bootstrap Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
